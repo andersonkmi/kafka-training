@@ -1,9 +1,7 @@
-package org.codecraftlabs.kafka;
+package org.codecraftlabs.kafka.intro;
 
-import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +12,8 @@ import static org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS
 import static org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG;
 
-public class ProducerDemoWithCallback {
-    private static Logger logger = LoggerFactory.getLogger(ProducerDemoWithCallback.class);
+public class ProducerDemoWithKeys {
+    private static Logger logger = LoggerFactory.getLogger(ProducerDemoWithKeys.class);
 
     public static void main(String[] args) {
         String bootstrapServers = "127.0.0.1:9092";
@@ -28,23 +26,25 @@ public class ProducerDemoWithCallback {
         // create the producer
         KafkaProducer<String, String> producer = new KafkaProducer<>(properties);
 
+        String topic = "first_topic";
         for (int index = 0; index < 15; index++) {
+            String value = "hello_word " + index;
+            String key = "key_" + index;
+
             // Create a producer record
-            ProducerRecord<String, String> record = new ProducerRecord<>("first_topic", "hello_world " + index);
+            ProducerRecord<String, String> record = new ProducerRecord<>(topic, key, value);
+            logger.info("Key: " + key);
 
             // send data
-            producer.send(record, new Callback() {
-                @Override
-                public void onCompletion(RecordMetadata metadata, Exception exception) {
-                    if (exception == null) {
-                        logger.info("Received new metadata.\n" +
-                                "Topic: " + metadata.topic() + "\n" +
-                                "Partition: " + metadata.partition() + "\n" +
-                                "Offset: " + metadata.offset() + "\n" +
-                                "Timestamp: " + metadata.timestamp());
-                    } else {
-                        logger.error("Error while producing", exception);
-                    }
+            producer.send(record, (metadata, exception) -> {
+                if (exception == null) {
+                    logger.info("Received new metadata.\n" +
+                            "Topic: " + metadata.topic() + "\n" +
+                            "Partition: " + metadata.partition() + "\n" +
+                            "Offset: " + metadata.offset() + "\n" +
+                            "Timestamp: " + metadata.timestamp());
+                } else {
+                    logger.error("Error while producing", exception);
                 }
             });
         }

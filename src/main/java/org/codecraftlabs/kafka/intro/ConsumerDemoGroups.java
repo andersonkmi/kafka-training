@@ -1,4 +1,4 @@
-package org.codecraftlabs.kafka;
+package org.codecraftlabs.kafka.intro;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -12,12 +12,12 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
 
-public class ConsumerDemo {
-    private static final Logger logger = LoggerFactory.getLogger(ConsumerDemo.class);
+public class ConsumerDemoGroups {
+    private static final Logger logger = LoggerFactory.getLogger(ConsumerDemoGroups.class);
 
     public static void main(String[] args) {
         String bootstrapServers = "localhost:9092";
-        String groupId = "fourth-application";
+        String groupId = "fifth-application";
 
         Properties properties = new Properties();
         properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
@@ -38,4 +38,5 @@ public class ConsumerDemo {
             }
         }
     }
+
 }

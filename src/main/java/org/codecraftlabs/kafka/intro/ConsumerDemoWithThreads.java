@@ -1,4 +1,4 @@
-package org.codecraftlabs.kafka;
+package org.codecraftlabs.kafka.intro;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;

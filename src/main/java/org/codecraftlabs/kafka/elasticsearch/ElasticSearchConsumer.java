@@ -11,8 +11,9 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
@@ -76,18 +77,23 @@ public class ElasticSearchConsumer {
         while (true) {
             ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(100));
 
+            Integer recordCount = records.count();
+            BulkRequest bulkRequest = new BulkRequest();
+
             for (ConsumerRecord<String, String> record : records) {
                 // twitter feed specific id
                 String id = consumer.extractIdFromTweet(record.value());
 
                 String jsonString = record.value();
                 IndexRequest indexRequest = new IndexRequest("twitter", "tweets", id).source(jsonString, XContentType.JSON);
-                IndexResponse response = client.index(indexRequest, RequestOptions.DEFAULT);
-                String responseId = response.getId();
-                logger.info("Response id: " + responseId);
+                bulkRequest.add(indexRequest);
             }
 
-            kafkaConsumer.commitSync();
+            if (recordCount > 0) {
+                BulkResponse bulkResponse = client.bulk(bulkRequest, RequestOptions.DEFAULT);
+                logger.info(bulkResponse.toString());
+                kafkaConsumer.commitSync();
+            }
         }
 
         //client.close();
